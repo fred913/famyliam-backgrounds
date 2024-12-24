@@ -32,7 +32,6 @@ const subdivisions = ref(props.subdivisions)
 
 watch([width, height, subdivisions], () => {
   reinitMesh()
-  refreshMesh()
 })
 
 const grid: Grid<ControlPoint> = new Grid(3, 3)
@@ -67,22 +66,22 @@ function reinitMesh() {
   )
 }
 
-const ctrlPntColors: Grid<[number, number, number]> = new Grid(3, 3)
+// const ctrlPntColors: Grid<[number, number, number]> = new Grid(3, 3)
 
-function refreshMesh() {
-  for (let x = 0; x < grid.width; x++) {
-    for (let y = 0; y < grid.height; y++) {
-      const controlPoint = grid.get(x, y)
-      // just assign #ff0000
-      const color: [number, number, number] = [1, 0, 0]
-      controlPoint.color = color
-      // location, x and y: [-1, 1]
-      controlPoint.location = [x - 1, y - 1]
-      console.log(controlPoint.location, color)
-      ctrlPntColors.set(x, y, color)
-    }
-  }
-}
+// function refreshMesh() {
+//   for (let x = 0; x < grid.width; x++) {
+//     for (let y = 0; y < grid.height; y++) {
+//       const controlPoint = grid.get(x, y)
+//       // just assign #ff0000
+//       const color: [number, number, number] = [1, 0, 0]
+//       controlPoint.color = color
+//       // location, x and y: [-1, 1]
+//       controlPoint.location = [x - 1, y - 1]
+//       console.log(controlPoint.location, color)
+//       ctrlPntColors.set(x, y, color)
+//     }
+//   }
+// }
 
 function meshMainWithArgs() {
   return meshMain(grid, subdivisions.value, pointGrid, colorGrid, cnv.value)
@@ -108,11 +107,11 @@ function updateGrid(
     }
   }
 
-  refreshMesh()
-  update()
+  // refreshMesh()
 
-  refreshMesh()
-  update()
+  // refreshMesh()
+  // update()
+  // update()
 }
 
 const update = debounce(
@@ -134,11 +133,13 @@ function updateSize(w: number, h: number) {
 
   cnv.value.width = w
   cnv.value.height = h
+
+  reinitMesh()
+  update()
 }
 
 defineExpose({
   toggleWireframe,
-  refreshMesh,
   reinitMesh,
   updateSize,
   update,

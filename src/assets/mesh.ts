@@ -17,27 +17,59 @@ export function lerp(t: number, min: number, max: number) {
   return min + t * (max - min)
 }
 
+const globalRenderers: {
+  [key: string]: {
+    renderer: three.WebGLRenderer,
+    scene: three.Scene,
+    camera: three.OrthographicCamera
+  }
+} = {}
+
+function getCvsCtx(canvas: HTMLCanvasElement) {
+  if (!globalRenderers[canvas.id]) {
+    const scene = new three.Scene()
+    const camera = new three.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000)
+
+    const renderer = new three.WebGLRenderer({
+      alpha: false,
+      canvas: canvas,
+      antialias: true,
+    })
+    globalRenderers[canvas.id] = {
+      renderer,
+      scene,
+      camera,
+    }
+  }
+
+  const { renderer, scene, camera } = globalRenderers[canvas.id]
+
+  // resize all contexts
+  renderer.setSize(canvas.width, canvas.height)
+
+  return { renderer, scene, camera }
+}
+
 function render(canvas: string | HTMLCanvasElement, mesh: three.Mesh) {
-  const cvs = typeof canvas === 'string' ? document.getElementById(canvas) : canvas
+  const cvs = (typeof canvas === 'string' ? document.getElementById(canvas) : canvas) as (HTMLCanvasElement | null)
   if (!cvs) throw new Error('Canvas not found')
 
-  const scene = new three.Scene()
+  console.log('Rendering')
 
-  const camera = new three.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000)
+  const { renderer, scene, camera } = getCvsCtx(cvs as HTMLCanvasElement)
+
   camera.position.z = 5
 
-  const renderer = new three.WebGLRenderer({
-    alpha: true,
-    canvas: cvs,
-    antialias: true,
-  })
   // TODO figure out if this is necessary
   // renderer.inputColorSpace = three.SRGBColorSpace
   renderer.outputColorSpace = three.SRGBColorSpace
+  // renderer.clear()
 
   scene.add(mesh)
 
   renderer.render(scene, camera)
+
+  console.log('Rendered for w, h', cvs.width, cvs.height)
 }
 
 function buildGeometry(
